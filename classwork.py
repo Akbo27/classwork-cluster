@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 
 file_path = 'points.csv'
 points= []
@@ -12,26 +13,31 @@ with open(file_path, 'r') as file:
 
 points = np.array(points)
 
+kmeans = KMeans(n_clusters=3, random_state=0)
+kmeans.fit(points)
+centroids_kmeans = kmeans.cluster_centers_
+labels = kmeans.labels_
+
 x_min, y_min = points.min(axis=0)
 x_max, y_max = points.max(axis=0)
 
-centroids = np.array([
-    [x_min, y_min],
-    [x_max, y_max],
-    [(x_min + x_max) / 2, (y_min + y_max) / 2]
-])
-
 plt.figure(figsize=(8, 6))
-plt.scatter(points[:, 0], points[:, 1], color='blue', label='Points')
-plt.scatter(centroids[:, 0], centroids[:, 1], color='red', marker='x', s=100, label='Centroids')
+
+for i in range(3):
+    plt.scatter(points[labels == i][:, 0], points[labels == i][:, 1], label=f'Cluster {i+1}')
+
+plt.scatter(centroids_kmeans[:, 0], centroids_kmeans[:, 1], color='red', marker='x', s=100, label='K-means Centroids')
+
 plt.axvline(x=x_min, color='green', linestyle='--', label='X Bounds')
 plt.axvline(x=x_max, color='green', linestyle='--')
 plt.axhline(y=y_min, color='purple', linestyle='--', label='Y Bounds')
 plt.axhline(y=y_max, color='purple', linestyle='--')
-plt.title('Points and Estimated Centroids')
+
+plt.title('Points and K-means Estimated Centroids')
 plt.xlabel('X Coordinate')
 plt.ylabel('Y Coordinate')
 plt.legend()
 plt.grid(True)
+
 plt.show()
 
